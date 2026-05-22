@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>To-do list</title>
+    <meta name="theme-color" content="#4A90D9">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/png" href="logo.png">
+    <link rel="apple-touch-icon" href="logo.png">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- 页面 1: 日程 -->
+        <main id="page-schedule" class="page active">
+            <header class="top-bar">
+                <div class="title">日程</div>
+                <div class="header-date" id="headerDate"></div>
+            </header>
+
+            <div class="main-content">
+                <!-- 左侧：时间轴 -->
+                <div class="timeline-column">
+                    <div class="timeline-list" id="timelineList"></div>
+                    <button class="add-period-btn" id="addPeriodBtn">+ 添加安排</button>
+                </div>
+
+                <!-- 右侧：待办 + 打卡 -->
+                <div class="todo-column">
+                    <!-- 待办事项 -->
+                    <div class="todo-section">
+                        <div class="todo-tabs">
+                            <span class="active" data-tab="pending">待办事项</span>
+                            <span data-tab="completed">已完成</span>
+                        </div>
+                        <div class="tag-filters" id="tagFilters"></div>
+                        <div class="todo-list" id="todoList"></div>
+                        <button class="add-task-btn" id="addTaskBtn">+ 添加任务</button>
+                    </div>
+
+                    <!-- 间距：把打卡推到距底部约40%的位置 -->
+                    <div class="checkin-spacer"></div>
+                    <!-- 打卡模块 -->
+                    <div class="checkin-module">
+                        <div class="checkin-module-header">
+                            <span class="checkin-module-title">打卡</span>
+                            <div class="checkin-module-tabs">
+                                <span class="checkin-tab active" data-ctype="daily">每日</span>
+                                <span class="checkin-tab" data-ctype="weekly">每周</span>
+                            </div>
+                        </div>
+                        <div class="checkin-module-list" id="checkinModuleList"></div>
+                        <button class="add-checkin-module-btn" id="addCheckinModuleBtn">+ 添加打卡</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- 页面 2: 记账 -->
+        <main id="page-finance" class="page">
+            <header class="top-bar">
+                <div class="title">账本</div>
+            </header>
+            <div class="finance-content">
+                <div class="chart-container card">
+                    <div class="chart-tabs">
+                        <span class="chart-tab active" data-period="week">周</span>
+                        <span class="chart-tab" data-period="month">月</span>
+                        <span class="chart-tab" data-period="year">年</span>
+                        <span class="chart-tab" data-period="custom">自定义</span>
+                    </div>
+                    <div class="custom-range" id="customRange" style="display:none">
+                        <input type="date" id="rangeStart" class="range-input">
+                        <span>至</span>
+                        <input type="date" id="rangeEnd" class="range-input">
+                        <button class="range-apply-btn" id="rangeApplyBtn">应用</button>
+                    </div>
+                    <canvas id="expenseChart" class="expense-chart"></canvas>
+                </div>
+
+                <div class="finance-summary">
+                    <div class="summary-item">
+                        <small>总收入</small>
+                        <h3 id="totalIncome" style="color:var(--primary-blue)">0.00</h3>
+                    </div>
+                    <div class="summary-item">
+                        <small>总支出</small>
+                        <h3 id="totalExpense" style="color:var(--harmony-red)">0.00</h3>
+                    </div>
+                    <div class="summary-item">
+                        <small>盈余</small>
+                        <h3 id="totalSurplus">0.00</h3>
+                    </div>
+                </div>
+
+                <div class="finance-list-container">
+                    <h4>账单明细</h4>
+                    <div id="financeList" class="finance-list"></div>
+                </div>
+
+                <button class="add-finance-btn" id="addFinanceBtn">+ 记一笔</button>
+            </div>
+        </main>
+
+        <!-- 页面 3: 专注 -->
+        <main id="page-focus" class="page">
+            <header class="top-bar">
+                <div class="title">专注</div>
+            </header>
+            <div class="focus-page-content">
+                <div class="focus-timer-display" id="focusPageTimer">25:00</div>
+                <div class="focus-preset-label">选择专注时长</div>
+                <div class="focus-preset-buttons">
+                    <button class="focus-preset-btn" data-min="15">15分钟</button>
+                    <button class="focus-preset-btn active" data-min="25">25分钟</button>
+                    <button class="focus-preset-btn" data-min="45">45分钟</button>
+                    <button class="focus-preset-btn" data-min="60">60分钟</button>
+                </div>
+                <label class="focus-lock-label">
+                    <input type="checkbox" id="focusLockMode"> 严格模式（专注期间不可退出）
+                </label>
+                <button class="focus-start-btn" id="focusPageStartBtn">开始专注</button>
+            </div>
+        </main>
+
+        <!-- 页面 4: 设置 -->
+        <main id="page-settings" class="page">
+            <header class="top-bar">
+                <div class="title">设置</div>
+            </header>
+            <div class="settings-content">
+                <div class="settings-section">
+                    <div class="settings-section-title">数据管理</div>
+                    <button class="settings-btn" id="syncDeviceCalendarBtn">
+                        <span class="settings-btn-icon">📡</span>
+                        <span class="settings-btn-text">同步系统日历</span>
+                        <span class="settings-btn-arrow">›</span>
+                    </button>
+                    <label class="settings-btn" for="_icsFileInput">
+                        <span class="settings-btn-icon">📅</span>
+                        <span class="settings-btn-text">导入华为日历</span>
+                        <span class="settings-btn-arrow">›</span>
+                    </label>
+                    <button class="settings-btn" id="exportDataBtn">
+                        <span class="settings-btn-icon">📤</span>
+                        <span class="settings-btn-text">导出全部数据</span>
+                        <span class="settings-btn-arrow">›</span>
+                    </button>
+                    <label class="settings-btn" for="_backupFileInput">
+                        <span class="settings-btn-icon">📥</span>
+                        <span class="settings-btn-text">导入数据备份</span>
+                        <span class="settings-btn-arrow">›</span>
+                    </label>
+                    <button class="settings-btn danger" id="clearAllDataBtn">
+                        <span class="settings-btn-icon">🗑️</span>
+                        <span class="settings-btn-text">清除所有数据</span>
+                        <span class="settings-btn-arrow">›</span>
+                    </button>
+                </div>
+                <div class="settings-section">
+                    <div class="settings-section-title">标签管理</div>
+                    <div id="tagManageList" class="tag-manage-list"></div>
+                </div>
+                <div class="settings-section">
+                    <div class="settings-section-title">记账分类管理</div>
+                    <div id="financeCatManageList" class="tag-manage-list"></div>
+                </div>
+                <div class="settings-section">
+                    <div class="settings-section-title">关于</div>
+                    <div class="settings-about">To-do list v1.0 — 离线可用</div>
+                </div>
+            </div>
+            <input type="file" id="_icsFileInput" accept=".ics,.ical,text/calendar">
+            <input type="file" id="_backupFileInput" accept=".json">
+        </main>
+
+        <!-- 日历子页面（右滑进入） -->
+        <div id="calendarPanel" class="calendar-panel">
+            <div class="calendar-panel-header">
+                <span class="calendar-panel-back" id="calendarPanelBack">‹ 返回</span>
+                <div class="calendar-month-nav">
+                    <span class="calendar-nav-arrow" id="calPrevMonth">‹</span>
+                    <span class="calendar-panel-date" id="calendarPanelDate"></span>
+                    <span class="calendar-nav-arrow" id="calNextMonth">›</span>
+                </div>
+                <button class="calendar-panel-add" id="calendarPanelAddBtn">+</button>
+            </div>
+            <div class="calendar-grid-header">
+                <span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span><span>日</span>
+            </div>
+            <div class="calendar-grid" id="calendarGrid"></div>
+            <div class="calendar-day-title" id="calendarDayTitle"></div>
+            <div class="calendar-day-list" id="calendarDayList"></div>
+        </div>
+
+        <!-- 打卡时间选择器 -->
+        <div id="checkinTimeModal" class="checkin-time-modal">
+            <div class="checkin-time-content">
+                <div class="checkin-time-header">
+                    <span class="checkin-time-title" id="checkinTimeTitle">选择打卡时间</span>
+                    <span class="checkin-time-close" id="checkinTimeClose">&times;</span>
+                </div>
+                <div class="checkin-time-wheels">
+                    <div class="checkin-time-wheel-container">
+                        <div class="checkin-time-wheel" id="checkinHourWheel"></div>
+                        <div class="checkin-time-wheel-label">时</div>
+                    </div>
+                    <span class="checkin-time-colon">:</span>
+                    <div class="checkin-time-wheel-container">
+                        <div class="checkin-time-wheel" id="checkinMinuteWheel"></div>
+                        <div class="checkin-time-wheel-label">分</div>
+                    </div>
+                </div>
+                <div class="checkin-time-actions">
+                    <button class="checkin-time-cancel" id="checkinTimeCancel">取消</button>
+                    <button class="checkin-time-confirm" id="checkinTimeConfirm">确认打卡</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 专注模式覆盖层 -->
+        <div id="focus-overlay" class="focus-overlay">
+            <div class="focus-content">
+                <div class="focus-tip" id="focusOverlayTip">正在专注中，请勿使用其他软件</div>
+                <div class="focus-timer" id="timerDisplay">25:00</div>
+                <button class="exit-focus-btn" id="stopFocusBtn">放弃专注</button>
+            </div>
+        </div>
+
+        <!-- 通用模态框 -->
+        <div id="modal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 id="modalTitle">添加内容</h3>
+                    <span class="close-modal">&times;</span>
+                </div>
+                <div id="modalBody" class="form-group"></div>
+            </div>
+        </div>
+
+        <!-- 底部导航 -->
+        <nav class="bottom-nav">
+            <div class="nav-item active" data-page="schedule">
+                <span class="nav-icon">📅</span>
+                <span>日程</span>
+            </div>
+            <div class="nav-item" data-page="finance">
+                <span class="nav-icon">💰</span>
+                <span>记账</span>
+            </div>
+            <div class="nav-item" data-page="focus">
+                <span class="nav-icon">🎯</span>
+                <span>专注</span>
+            </div>
+            <div class="nav-item" data-page="settings">
+                <span class="nav-icon">⚙️</span>
+                <span>设置</span>
+            </div>
+        </nav>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html>

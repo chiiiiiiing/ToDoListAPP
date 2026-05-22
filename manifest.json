@@ -1,0 +1,47 @@
+{
+  "name": "To-do list",
+  "short_name": "To-do list",
+  "id": "./index.html",
+  "description": "支持日程、记账、专注和打卡的本地离线应用",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "display_override": ["standalone"],
+  "background_color": "#F5F6FA",
+  "theme_color": "#4A90D9",
+  "categories": ["productivity", "lifestyle"],
+  "shortcuts": [
+    {
+      "name": "打开日程",
+      "short_name": "日程",
+      "description": "直接进入日程页面",
+      "url": "./index.html#schedule"
+    },
+    {
+      "name": "打开记账",
+      "short_name": "记账",
+      "description": "直接进入记账页面",
+      "url": "./index.html#finance"
+    },
+    {
+      "name": "打开专注",
+      "short_name": "专注",
+      "description": "直接进入专注页面",
+      "url": "./index.html#focus"
+    }
+  ],
+  "icons": [
+    {
+      "src": "logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
